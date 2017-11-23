@@ -1,0 +1,162 @@
+//LENNY MORICONI
+
+ALGORITHME jeuDeNim
+
+//BUT : Programme qui fait jouer l'ordinateur contre un joueur au jeu des allumettes. A chaque tour, le joueur actif choisit de retirer de 1 à 3 allumettes du tas. Le premier à retirer la dernière des 21 allumettes a perdu. Le joueur qui laisse un nombre d'allumettes égal à un multiple de 4 +1 gagne.
+//ENTREE : Un entier compris entre 1 et 3 est saisi par le joueur actif.
+//SORTIE : Le nombre d'allumettes restantes, si un joueur retire la dernière allumette, un message "Victoire !" s'affiche, sinon "Vous avez perdu...".
+
+CONST
+	TAS = 21	//nombre total d'allumettes
+	MIN = 1		//nombre minimum d'allumettes qu'un joueur peut retirer
+	MAX = 3		//nombre maximum d'allumettes qu'un joueur peut retirer
+
+//DEFINITIONS FONCTIONS & PROCEDURES
+
+FONCTION tourJoueurActif(nom : CHAINE, reste : ENTIER) : ENTIER
+
+//BUT : Procédure qui affiche le reste d'allumettes du tas et propose au joueur actif de retirer de 1 à 3 allumettes
+//ENTREE : Un entier compris entre 1 et 3 saisi par le joueur actif
+//SORTIE : Message d'erreur si le nombre n'est pas compris entre 1 et 3, sinon reste - nombre saisi par le joueur
+
+VAR
+	saisieJoueur : ENTIER
+	
+DEBUT
+	//répéter tant que le nombre d'allumettes à retirer n'est pas compris entre 1 et 3
+	REPETER
+		ECRIRE nom,", c'est a vous !"
+		ECRIRE "Reste : ",reste," allumette(s)."
+		ECRIRE "Voulez-vous retirer 1, 2 ou 3 allumette(s) ?"
+		LIRE saisieJoueur
+		SI (saisieJoueur < MIN) OU (saisieJoueur > MAX) ALORS
+			ECRIRE "Le nombre saisi doit etre compris entre 1 et 3. Veuillez recommencer."
+		FINSI
+	TANTQUE (saisieJoueur < MIN) ET (saisieJoueur > MAX)
+	tourJoueurActif <- saisieJoueur
+FINFONCTION
+
+FONCTION tourOrdiEasy() : ENTIER
+
+//BUT : Procédure qui fait jouer l'ordi de façon aléatoire
+//ENTREE : NEANT
+//SORTIE : Le nombre d'allumettes retirées par l'ordi
+
+VAR
+	saisieOrdi : ENTIER
+
+DEBUT
+	ECRIRE "C'est au tour de CPU !"
+
+	//l'ordinateur retire un nombre aléatoire d'allumettes compris entre 1 et 3 (nombre aléatoire compris entre 0 et n-1, donc on ajoute 1 au nombre généré)
+
+	saisieOrdi <- NOMBREALEATOIRE(MAX)+1
+	ECRIRE "CPU retire ",saisieOrdi," allumette(s)."
+	tourOrdiEasy <- saisieOrdi
+FINFONCTION
+
+FONCTION tourOrdiHard(reste : ENTIER) : ENTIER
+
+//BUT : Procédure qui fait jouer l'ordi selon la stratégie gagnante
+//ENTREE : Le nombre d'allumettes restantes, l'ordi va jouer selon ce nombre
+//SORTIE : Le nombre d'allumettes retirées par l'ordi
+
+VAR
+	saisieOrdi : ENTIER
+
+DEBUT
+	ECRIRE "C'est au tour de CPU !"
+
+	//l'ordinateur retire un nombre d'allumettes, de sorte que le reste soit un multiple de 4 +1
+	SI reste MOD 4 = 0 ALORS 	//cas où reste est un multiple de 4
+		saisieOrdi <- 3		//pour avoir un reste égal à un multiple de 4 +1
+	SINON SI reste MOD 4 = 1 ALORS 	//cas où le reste est déjà un multiple de 4 +1
+		saisieOrdi <- 1 	//si joueur est en train de gagner car il joue au hasard, alors gagner du temps en retirant une allumette en espérant qu'il commette une erreur
+	SINON 	//autres cas
+		saisieOrdi <- (reste MOD 4) - 1 	//pour avoir un reste égal à 1, et donc avoir un multiple de 4 +1 
+	FINSI
+	ECRIRE "CPU retire ",saisieOrdi," allumette(s)."
+	tourOrdiHard <- saisieOrdi
+FINFONCTION
+
+PROCEDURE jeu(nom : CHAINE, choix : ENTIER)
+
+//BUT : Procédure qui annonce le tour du joueur actif et appelle les procédures qui permettent au joueur actif (qu'il soit l'ordi ou humain) de jouer
+//ENTREE : Le nom du joueur ainsi que le choix du mode de jeu saisis dans le programme principal
+//SORTIE : Message de victoire si l'ordi a retiré la dernière allumette, sinon message de défaite
+
+VAR
+	saisie,reste : ENTIER
+	joueurActif : BOOLEEN	//sert à vérifier qui est le joueur actif (joueur 1 = VRAI) lorsque la dernière allumette est retirée
+
+DEBUT
+	//initialisation des variables
+
+	saisie <- 0
+	reste <- TAS
+	joueurActif <- FAUX
+
+	//tant qu'il reste des allumettes
+
+	TANTQUE reste > 0 FAIRE
+		joueurActif <- VRAI 	//c'est au tour de joueur 1
+		saisie <- tourJoueurActif(nom,reste)
+		reste <- reste - saisie
+
+		//dans le cas où le joueur 1 retire la dernière allumette, on vérifie qu'il reste encore des allumettes en jeu avant de faire jouer l'ordinateur
+
+		SI reste > 0 ALORS
+			joueurActif <- FAUX		//c'est au tour de l'ordinateur
+			
+			//selon le choix de l'utilisateur dans le programme principal, l'ordinateur va jouer selon la stratégie gagnate, ou non
+
+			SI choix = 1 ALORS
+				saisie <- tourOrdiEasy()
+			SINON
+				saisie <- tourOrdiHard(reste)
+			reste <- reste - saisie
+		FINSI
+	FINTANTQUE
+
+	//on vérifie qui est le joueur actif pour afficher le message de victoire ou de défaite
+
+	SI joueurActif = FAUX ALORS
+		ECRIRE "Victoire !"
+	SINON
+		ECRIRE "Vous avez perdu..."
+	FINSI
+FINPROCEDURE
+
+//PROGRAMME PRINCIPAL
+
+VAR
+	choix : ENTIER
+	nom : CHAINE
+
+DEBUT
+	//saisie du nom du joueur
+
+	ECRIRE "Veuillez saisir votre nom."
+	LIRE nom
+	REPETER
+		REPETER
+			ECRIRE nom," que voulez-vous faire ?"
+			ECRIRE "1 = Mode facile"	//ordi joue au hasard
+			ECRIRE "2 = Mode difficile"	//ordi connait la stratégie gagnante
+			ECRIRE "0 = Quitter"
+			LIRE choix
+			//on vérifie que le choix est compris entre 0 et 2
+			SI choix < 0 OU choix > 2 ALORS
+				ECRIRE "Vous devez choisir un nombre compris entre 0 et 2. Veuillez recommencer."
+			FINSI
+		TANTQUE choix < 0 ET choix > 2
+
+		//si le joueur a choisi de jouer, alors on appelle la procédure "jeu", sinon il quitte le programme
+
+		SI choix = 1 OU choix = 2 ALORS
+			jeu(nom,choix)
+		FINSI
+
+	TANTQUE choix <> 0
+	ECRIRE "Au revoir !"
+FIN

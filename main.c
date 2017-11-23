@@ -12,7 +12,7 @@
 #define TAS 21		//nombre total d'allumettes
 #define MIN 1		//nombre minimum d'allumettes qu'un joueur peut retirer
 #define MAX 3		//nombre maximum d'allumettes qu'un joueur peut retirer
-#define MENU 6		//nombre d'options dans le menu principal
+#define MENU 5		//nombre d'options dans le menu principal
 
 //PROTOTYPES
 void tourJoueurActif(char username[TAILLE], int reste, int *pSaisie);
@@ -46,9 +46,8 @@ int main()
 			printf("1 = Mode facile (1 joueur)\n");	//ordi joue au hasard
 			printf("2 = Mode difficile (1 joueur)\n");	//ordi connait la stratégie gagnante
 			printf("3 = Mode versus (2 joueurs)\n");	//fait s'affronter 2 joueurs
-			printf("4 = Mode alternatif (1 joueur)\n");	//mode de jeu alternatif contre l'ordi
-			printf("5 = Regles du jeu\n");	//affiche à l'écran les règles du jeu
-			printf("6 = Modifier nom\n");	//relance la procedure saisieNom afin de changer le nom du joueur 1
+			printf("4 = Regles du jeu\n");	//affiche à l'écran les règles du jeu
+			printf("5 = Modifier nom\n");	//relance la procedure saisieNom afin de changer le nom du joueur 1
 			printf("0 = Quitter\n\n");
 			printf("Votre choix : ");
 			scanf("%d",&choix);
@@ -59,15 +58,15 @@ int main()
 				case 3 :
 					jeu(username,choix);
 					break;
-				case 5 :
+				case 4 :
 					reglesDuJeu();
 					break;
-				case 6 :
+				case 5 :
 					saisieNom(username,choix);
 					break;
 				case 0 :
 					break;
-	            default :   //si choix n'est pas compris entre 0 et 6
+	            default :   //si choix n'est pas compris entre 0 et 5
 	                system("cls");
 					printf("Vous devez choisir un nombre compris entre 0 et %d. Veuillez recommencer.",MENU);
 			        getc(stdin);

@@ -233,7 +233,8 @@ void reglesDuJeu(){
 	printf("Le jeu des allumettes se joue a deux.\n");
 	printf("Les deux joueurs se partagent un tas de 21 allumettes.\n");
 	printf("A tour de role, ils peuvent retirer 1, 2 ou 3 allumettes du tas.\n");
-	printf("Le joueur qui retire la derniere allumette a perdu.\n\n\n");
+	printf("Le joueur qui retire la derniere allumette a perdu.\n\n");
+    printf("Entree = Menu principal");
     getc(stdin);
     fflush(stdin);
 }

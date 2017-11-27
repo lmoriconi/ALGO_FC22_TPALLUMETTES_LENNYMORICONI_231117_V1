@@ -1,0 +1,413 @@
+//LENNY MORICONI
+
+ALGORITHME varianteJeuDeNim
+
+//BUT : Programme qui fait jouer l'ordinateur contre un joueur à une variante du jeu des allumettes. Le joueur et l'ordinateur se partagent un tas de 16 allumettes reparties sur 4 lignes. A tour de role, ils peuvent retirer 1, 2 ou 3 allumettes du tas.
+//ENTREE : Un entier compris entre 1 et 3 est saisi par le joueur actif.
+//SORTIE : Le nombre d'allumettes restantes, si un joueur retire la dernière allumette, un message "Victoire !" s'affiche, sinon "Vous avez perdu...".
+
+CONST
+	MAX = 3		//nombre maximum d'allumettes qu'un joueur peut retirer
+	LIGNE = 4	//nombre de lignes du tableau
+	COLONNE = 7	//nombre de colonnes du tableau
+
+TYPE
+	TABALLU = TABLEAU[1..LIGNE,1..COLONNE] DE BOOLEEN 	//tableau 4x7 de booléens pour contenir les allumettes (VRAI = plein, FAUX = vide)
+
+//DEFINITIONS FONCTIONS & PROCEDURES
+
+FONCTION verifLigne(t : TABALLU, i : ENTIER) : BOOLEEN
+
+//BUT : Fonction qui vérifie que la ligne sur laquelle un joueur retire actuellement des allumettes est vide ou non
+//ENTREE : Tableau t et index de la ligne actuelle
+//SORTIE : FAUX s'il reste des allumettes sur la ligne, sinon VRAI
+
+VAR
+	j : ENTIER
+
+DEBUT
+	POUR j DE 1 A COLONNE FAIRE
+		SI t[i,j] = VRAI ALORS
+			verifLigne <- FAUX
+		FINSI
+	FINPOUR
+	verifLigne <- VRAI
+FINFONCTION
+
+FONCTION verifCase(t : TABALLU, x,y : ENTIER) : BOOLEEN
+
+//BUT : Fonction qui sert à vérifier que t[x,y] est vide ou non
+//ENTREE : Tableau t et coordonnées x et y saisie par le joueur
+//SORTIE : FAUX si la case contient une allumette, sinon VRAI
+
+DEBUT
+	SI t[x,y] = VRAI ALORS
+		verifCase <- FAUX //s'il y a une allumette, alors la case n'est pas vide
+	SINON
+		verifCase <- VRAI //sinon c'est qu'elle est vide
+	FINSI
+FINFONCTION
+
+FONCTION verifTab(t : TABALLU) : BOOLEEN
+
+//BUT : Fonction qui vérifie que le tableau contient encore des valeurs VRAI afin de déterminer s'il y a encore des allumettes en jeu
+//ENTREE : Tableau t
+//SORTIE : VRAI s'il reste encore des allumettes, sinon FAUX
+
+VAR
+	i,j : ENTIER
+
+DEBUT
+	POUR i DE 1 A LIGNE FAIRE
+		POUR j DE 1 A COLONNE FAIRE
+			SI t[i,j] = VRAI
+				verifTab <- VRAI
+			FINSI
+		FINPOUR
+	FINPOUR
+	verifTab <- FAUX
+FINFONCTION
+
+FONCTION tourJoueurActif(t : TABALLU, x : ENTIER) : TABALLU
+
+//BUT : Procédure qui propose au joueur actif de retirer 1 allumette dans la case de son choix
+//ENTREE : Les coordonnées [x,y] d'une case du tableau saisies par le joueur actif
+//SORTIE : Message d'erreur si une des saisies est incorrecte ou avertissement si une case est déjà vide, sinon modifie le tableau en retirant l'allumette souhaitée
+
+VAR
+	saisie,y : ENTIER
+	vide : BOOLEEN		//vérifier qu'une case est vide ou non lorsque le joueur veut retirer une allumette
+	
+DEBUT
+	vide <- FAUX
+
+	//répéter tant que la case sélectionnée n'est pas vide
+
+	REPETER
+		
+		//initialiser les variables à chaque tour de boucle
+
+		saisie <- 100
+		y <- 0
+
+		//répéter jusqu'à ce que le joueur confirme son coup
+
+		REPETER
+
+			//saisie y
+
+			REPETER
+				ECRIRE "Quelle colonne ?"
+				LIRE y
+				SI (y < 1) OU (y > COLONNE) ALORS
+					ECRIRE "Le nombre saisi doit etre compris entre 1 et ",COLONNE,". Veuillez recommencer."
+				FINSI
+			TANTQUE (y < 1) ET (y > COLONNE)
+			
+			//confirmation
+
+			REPETER
+				ECRIRE " Case [",x,"][",y,"]... Confirmer ?"
+				ECRIRE "1 = Oui"
+				ECRIRE "0 = Non"
+				LIRE saisie
+				SI (saisie < 0) OU (saisie > 1) ALORS
+					ECRIRE "Le nombre saisi doit être compris entre 0 et 1. Veuillez recommencer."
+				FINSI
+			TANTQUE (saisie < 0) ET (saisie > 1)
+		JUSQU'A saisie = 1
+
+		//on vérifie que la case confirmée est vide ou non
+
+		vide <- verifCase(t,x,y) 	
+		
+		//s'il y a une allumette, alors on la retire
+			 	
+		SI vide = VRAI ALORS
+			ECRIRE <- "La case sélectionnée est déjà vide. Veuillez en choisir une autre."
+		SINON
+			t[x,y] <- FAUX		//on retire l'allumette		
+		FINSI
+	TANTQUE vide = VRAI
+	
+	tourJoueurActif <- t
+FINFONCTION
+
+FONCTION tourOrdi(t : TABALLU, x : ENTIER) : TABALLU
+
+//BUT : Fonction qui fait jouer l'ordi de façon aléatoire
+//ENTREE : Tableau t et valeur de x
+//SORTIE : Tableau t modifié
+
+VAR
+	y : ENTIER
+	vide : BOOLEEN
+
+DEBUT
+	vide <- VRAI
+	ECRIRE "C'est au tour de CPU !"
+
+	//on génère des coordonnées aléatoires, puis on vérifie que la case correspondante est vide
+
+	REPETER
+		y <- NOMBREALEATOIRE(COLONNE)
+		vide <- verifCase(t,x,y)
+	TANTQUE vide = VRAI
+
+	//on modifie ensuite le tableau en conséquence
+
+	t[x,y] <- FAUX
+
+	tourOrdiEasy <- t
+FINFONCTION
+
+PROCEDURE affichTab(t : TABALLU)
+
+//BUT : Procédure qui affiche le tableau des allumettes restantes
+//ENTREE : Tableau t
+//SORTIE : Affichage du tableau
+
+VAR
+	i,j : ENTIER
+DEBUT
+	POUR i DE 1 A LIGNE FAIRE
+		ECRIRE i 	//afin que le joueur ait les coordonnées des cases sous les yeux
+		POUR j DE 1 A COLONNE FAIRE
+			ECRIRE j //idem
+			ECRIRE t[i,j]
+		FINPOUR
+	FINPOUR
+FINPROCEDURE
+
+FONCTION initTab(t : TABALLU) : TABALLU
+
+//BUT : Fonction qui permet d'initialiser un tableau de booléens et de placer les allumettes (= VRAI) selon un modèle pyramidal
+//ENTREE : Tableau t
+//SORTIE : Tableau t rempli de VRAI (= allumettes) et FAUX selon modèle pyamidal
+
+VAR
+	i,j,milieu : ENTIER
+DEBUT
+	milieu <- (COLONNE+1)/2	//=3 (milieu de la pyramide)
+	POUR i DE 1 A LIGNE FAIRE 	//de 1 à 4
+		t[i,milieu] <- VRAI
+		POUR j DE 1 A i FAIRE
+			t[i,milieu-(j-1)] <- VRAI
+			t[i,milieu+(j-1)] <- VRAI
+		FINPOUR
+		SI i<4 ALORS
+			POUR j DE 1 A milieu-i FAIRE
+				t[i,j] <- FAUX
+				t[i,COLONNE-(j-1)] <- FAUX
+			POUR
+		FINSI
+	FINPOUR
+	initTab <- t
+FINFONCTION
+
+PROCEDURE jeu(nom : CHAINE)
+
+//BUT : Procédure qui annonce le tour du joueur actif et appelle les procédures qui permettent au joueur actif de jouer
+//ENTREE : Le nom du joueur
+//SORTIE : Message de victoire si l'ordi a retiré la dernière allumette, sinon message de défaite
+
+VAR
+	t : TABALLU
+	saisie,nbCoupsMax,cptCoupsOrdi,x : ENTIER
+	
+	joueurActif : BOOLEEN	//sert à vérifier qui est le joueur actif (joueur 1 = VRAI) lorsque la dernière allumette est retirée
+
+	reste : BOOLEEN 	//sert à vérifier s'il reste encore des allumettes
+
+	premierCoup : BOOLEEN	//sert à vérifier qu'il s'agit du premier coup du joueur afin de ne lui demander qu'une seule fois de sélectionner une ligne du tableau
+
+	ligneVide : BOOLEEN		//sert à vérifier que la ligne sur laquelle le joueur actif retire actuellement des allumettes est vide ou non
+
+
+DEBUT
+	//initialisation des variables
+
+	joueurActif <- FAUX 	//ce n'est pas encore au tour du joueur 1
+	reste <- VRAI 			//il reste encore des allumettes
+
+	//initialisation du tableau d'allumettes
+
+	t <- initTab(t)
+
+	//tant qu'il reste des allumettes
+
+	REPETER
+
+		//on réinitialise les variables
+		saisie <- 100
+		nbCoupsMax <- MAX
+		
+		//c'est au tour de joueur 1
+
+		joueurActif <- VRAI
+
+		//il s'agit de son premier coup
+
+		premierCoup <- VRAI
+
+		//répéter tant qu'il reste des allumettes, des coups au joueur, qu'il n'a pas décidé d'arrêter ouu qu'il reste encore des allumettes sur la ligne
+
+		REPETER
+
+			ECRIRE nom,", c'est a vous !"
+			ECRIRE "Allumettes restantes :"
+			affichTab(t)
+
+			//on vérifie que c'est le premier coup du joueur afin de ne lui demander qu'une seule fois de saisir x
+
+			SI premierCoup = VRAI ALORS
+
+				// Si la ligne sur laquelle le joueur souhaite jouer est vide, on lui demande de saisir une nouvelle ligne, sinon x prend l'index de cette ligne
+
+				REPETER	
+					REPETER
+						ECRIRE "Quelle ligne ?"
+						LIRE x
+						SI (x < 1) OU (x > LIGNE) ALORS
+							ECRIRE "Le nombre saisi doit etre compris entre 1 et ", LIGNE,". Veuillez recommencer."
+						FINSI
+					TANTQUE (x < 1) ET (x > LIGNE)
+					ligneVide <- verifLigne(t,x)
+					SI ligneVide = FAUX ALORS
+						numLigne <- x
+					SINON
+						ECRIRE "La ligne saisie ne contient pas d'allumette. Veuillez en saisir une autre."
+					FINSI
+				TANTQUE ligneVide = VRAI
+			FINSI
+
+			//le tableau est modifié
+
+			t <- tourJoueurActif(t,x) 
+
+			//on décrémente ensuite le nombre de coups restant
+
+			nbCoupsMax <- nbCoupsMax-1	
+			
+			//on vérifie qu'il reste encore des allumettes
+
+			reste <- verifTab(t)
+
+			SI reste = VRAI ALORS
+				ligneVide <- verifLigne(t,x)	//s'il reste des allumettes dans le tableau, on vérifie s'il reste des allumettes sur la ligne actuelle
+			FINSI
+
+			//s'il reste encore des coups au joueur ainsi que des allumettes et que sa ligne n'est pas vide, on lui propose de retirer une autre allumette
+
+			SI (nbCoupsMax > 0) ET (reste = VRAI) ET (ligneVide = FAUX) ALORS
+				ECRIRE "Voulez-vous retirer une autre allumette ? Il vous reste ",nbCoupsMax," coup(s)."
+				ECRIRE "1 = Oui"
+				ECRIRE "0 = Non"
+				LIRE saisie
+				SI (saisie < 0) OU (saisie > 1) ALORS
+					ECRIRE "Le nombre saisi doit être compris entre 0 et 1. Veuillez recommencer."
+				FINSI
+			SINON
+				SI (ligneVide = VRAI) ET (nbCoupsMax > 0) ALORS
+					ECRIRE "Il n'y a plus d'allumette dans la ligne. Fin du tour."
+				FINSI
+			FINSI
+			premierCoup <- FAUX 	//ce n'est plus le premierCoup
+
+		JUSQU'A (nbCoupsMax = 0) OU (saisie = 0) OU (reste = FAUX) OU (ligneVide = FAUX)
+
+		//dans le cas où le joueur 1 retire la dernière allumette, on vérifie qu'il reste encore des allumettes en jeu avant de faire jouer l'ordinateur
+
+		SI reste = VRAI ALORS
+
+			//c'est au tour de l'ordinateur
+
+			joueurActif <- FAUX	
+
+			//c'est son premier coup
+
+			premierCoup <- VRAI
+
+			//on réinitialise les variables
+
+			ligneVide <- FAUX
+			cptCoupsOrdi <- 0
+
+			//l'ordinateur retire un nombre aléatoire d'allumettes compris entre 1 et 3 (nombre aléatoire compris entre 0 et n-1, donc on ajoute 1 au nombre généré)
+
+			nbCoupsMax <- NOMBREALEATOIRE(MAX)
+
+			REPETER
+
+				//on génère aléatoirement la valeur de x tant que la ligne correspondante est vide
+				
+				SI premierCoup = VRAI ALORS
+					REPETER
+						x <- NOMBREALEATOIRE(LIGNE)
+						ligneVide <- verifLigne(t,x)
+					TANTQUE ligneVide = VRAI
+				FINSI
+
+				t <- tourOrdi(t,x)
+
+				reste <- verifTab(t)
+
+				SI reste = VRAI ALORS
+					ligneVide <- verifLigne(t,x)	
+					SI ligneVide = FAUX ALORS
+						nbCoupsMax <- nbCoupsMax - 1	//si la ligne contient encore des allumettes, on décrémente le nombre de coups
+					SINON
+						nbCoupsMax = 0	//sinon on le met à zéro
+					FINSI
+				FINSI
+
+				cptCoupsOrdi <- cptCoupsOrdi + 1
+				premierCoup <- FAUX
+
+			TANTQUE (reste = VRAI) OU (nbCoupsMax > 0) OU (ligneVide = FAUX)
+
+			ECRIRE "CPU retire ",cptCoups," allumette(s)."
+		FINSI
+	TANTQUE reste = VRAI
+
+	//on vérifie qui est le joueur actif pour afficher le message de victoire ou de défaite
+
+	SI joueurActif = FAUX ALORS
+		ECRIRE "Victoire !"
+	SINON
+		ECRIRE "Vous avez perdu..."
+	FINSI
+FINPROCEDURE
+
+//PROGRAMME PRINCIPAL
+
+VAR
+	choix : ENTIER
+	nom : CHAINE
+
+DEBUT
+	//saisie du nom du joueur
+
+	ECRIRE "Veuillez saisir votre nom."
+	LIRE nom
+	REPETER
+		REPETER
+			ECRIRE nom," que voulez-vous faire ?"
+			ECRIRE "1 = Mode alternatif	//	lancer la procédure qui permet de jouer à la version alternative du jeu de nim
+			ECRIRE "0 = Quitter"
+			LIRE choix
+			//on vérifie que le choix est compris entre 0 et 1
+			SI choix < 0 OU choix > 1 ALORS
+				ECRIRE "Vous devez choisir un nombre compris entre 0 et 1. Veuillez recommencer."
+			FINSI
+		TANTQUE choix < 0 ET choix > 1
+
+		//si le joueur a choisi de jouer, alors on appelle la procédure "jeu", sinon il quitte le programme
+
+		SI choix = 1 ALORS
+			jeu(nom,choix)
+		FINSI
+
+	TANTQUE choix <> 0
+	ECRIRE "Au revoir !"
+FIN
